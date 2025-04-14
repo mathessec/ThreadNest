@@ -1,31 +1,33 @@
-import bcrypt from "bcryptjs";
-import config from "./config.js";
-import jwt from "jsonwebtoken";
+import bcrypt from 'bcryptjs';
+import config from './config.js'
+import jwt from 'jsonwebtoken'
 
-const hashData = async (str) => {
-  let salt = await bcrypt.genSalt(config.SALT);
-  let hash = await bcrypt.hash(str, salt);
-  return hash;
-};
+const hashData=async(str)=>{
+    let salt = await bcrypt.genSalt(config.SALT)
+    console.log(salt)
+    let hash= await bcrypt.hash(str,salt)
+    console.log(hash)
+    return hash
+}
 
-const compareHash = async (hash, str) => {
-  return await bcrypt.compare(str, hash);
-};
+const compareHash = async(hash,str)=>{
+    return await bcrypt.compare(str,hash)
+}
 
-const createToken = (payload) => {
-  let token = jwt.sign(payload, config.JWT_SECRET, {
-    expiresIn: config.JWT_EXPIRY,
-  });
-  return token;
-};
+const createToken = (payload)=>{
+    let token = jwt.sign(payload,config.JWT_SECRET,{
+        expiresIn:config.JWT_EXPIRY
+    })
+    return token
+}
 
-const decodeToken = (token) => {
-  return jwt.decode(token);
-};
+const decodeToken=(token)=>{
+     return jwt.decode(token)
+} 
 
-export default {
-  hashData,
-  compareHash,
-  createToken,
-  decodeToken,
-};
+export default{
+    hashData,
+    compareHash,
+    createToken,
+    decodeToken
+}

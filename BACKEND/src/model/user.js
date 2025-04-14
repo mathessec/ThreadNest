@@ -1,21 +1,22 @@
-import mongoose from "./index.js";
-import validators from "../utils/validators.js";
+import mongoose from "./index.js"; // Assuming this imports your mongoose connection setup
+import validators from "../utils/validator.js";
 import { generateUUID } from "../utils/helper.js";
 
 const UserSchema = new mongoose.Schema(
   {
+    // Defines fields like name, id, email, password, role, etc.
     name: { type: String, required: true },
     id: {
       type: String,
       default: function () {
-        return generateUUID();
+        return generateUUID(); // Uses a helper function for default value
       },
       unique: true,
     },
     email: {
       type: String,
       required: [true, "Email is required"],
-      validate: {
+      validate: { // Includes validation
         validator: validators.validateEmail,
         message: (props) => `${props.value} is not a valid email!`,
       },
@@ -27,13 +28,13 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "tailor", "admin"],
+      enum: ["user", "tailor", "admin"], // Enumerated values for role
       default: "user",
     },
     mobile: {
       type: String,
       required: [true, "Mobile is required"],
-      validate: {
+      validate: { // Includes validation
         validator: validators.validateMobile,
         message: (props) => `${props.value} is not a valid mobile number!`,
       },
@@ -42,7 +43,8 @@ const UserSchema = new mongoose.Schema(
     resetPasswordToken: { type: String, default: undefined },
     resetPasswordExpire: { type: Date, default: undefined },
   },
-  { timestamps: true }
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
 
+// Creates and exports the Mongoose model named 'users' based on the schema
 export default mongoose.model("users", UserSchema);
