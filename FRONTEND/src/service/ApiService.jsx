@@ -1,5 +1,5 @@
 import axios from "axios";
-import config from "../utils/config.jsx";
+import config from "../utils/config";
 import toast from "react-hot-toast";
 const api = axios.create({
   baseURL: config.BASE_URL,
