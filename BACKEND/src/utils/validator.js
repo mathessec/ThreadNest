@@ -3,7 +3,6 @@ const validateEmail = (email) => {
     return regex.test(email);
 };
 
-
 const validateMobile = (mobile) => {
     let regex = /^\d{10}$/;
     return regex.test(mobile);

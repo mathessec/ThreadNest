@@ -3,6 +3,7 @@ import { sendEmail } from "../services/emailService.js";
 
 const createTailor = async (req, res) => {
   try {
+    console.log("Request Body:", req.body);
     // Check if a tailor with the same email already exists
     const existingTailor = await tailorsModel.findOne({ email: req.body.email });
     if (!existingTailor) {
@@ -32,30 +33,34 @@ const createTailor = async (req, res) => {
 };
 
 export const deleteTailor = async (req, res) => {
-    try {
-      const result = await tailorsModel.findOneAndDelete({ T_id: req.params.id });
-      if (!result) {
-        return res.status(404).send({ message: "Tailor not found" });
-      }
-      res.status(200).send({ message: "Tailor deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting tailor:", error.message);
-      res.status(500).send({ message: "Internal Server Error" });
+  try {
+    const result = await tailorsModel.findByIdAndDelete(req.params.id);
+    if (!result) {
+      return res.status(404).send({ message: "Tailor not found" });
     }
-  };
+    res.status(200).send({ message: "Tailor deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting tailor:", error.message);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
 
   export const editTailor = async (req, res) => {
     try {
-      const updatedTailor = await tailorsModel.findOneAndUpdate(
-        { T_id: req.params.id },
-        req.body,
+      // Find the tailor by _id (MongoDB's built-in _id)
+      const updatedTailor = await tailorsModel.findByIdAndUpdate(
+        req.params.id, // _id passed in the URL
+        req.body, // Request body containing the fields to update
         { new: true } // Return the updated document
       );
   
+      // If no tailor is found with the given _id, return an error
       if (!updatedTailor) {
         return res.status(404).send({ message: "Tailor not found" });
       }
   
+      // Send success response with the updated tailor details
       res.status(200).send({
         message: "Tailor updated successfully",
         tailor: updatedTailor,
@@ -65,10 +70,12 @@ export const deleteTailor = async (req, res) => {
       res.status(500).send({ message: "Internal Server Error" });
     }
   };
+  
 
   export const getTailorById = async (req, res) => {
     try {
-      const tailor = await tailorsModel.findOne({ T_id: req.params.id });
+      // Fetch tailor by MongoDB _id
+      const tailor = await tailorsModel.findById(req.params.id);
   
       if (!tailor) {
         return res.status(404).send({ message: "Tailor not found" });
@@ -76,10 +83,11 @@ export const deleteTailor = async (req, res) => {
   
       res.status(200).send({ tailor });
     } catch (error) {
-      console.error("Error fetching tailor:", error.message);
+      console.error("Error fetching tailor by _id:", error.message);
       res.status(500).send({ message: "Internal Server Error" });
     }
   };
+  
   
   export const getAllTailors = async (req, res) => {
     try {

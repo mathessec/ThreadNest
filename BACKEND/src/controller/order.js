@@ -75,19 +75,19 @@ export const createOrder = async (req, res) => {
     }
   };
 
-  export const editOrder = async (req, res) => {
+export const editOrder = async (req, res) => {
     try {
-      const { orderId } = req.params;
+      const { id } = req.params;
   
-      if (!orderId) {
+      if (!id) {
         return res.status(400).json({
           success: false,
-          message: "Order ID is required in the URL.",
+          message: "Order _id is required in the URL.",
         });
       }
   
-      const updatedOrder = await Order.findOneAndUpdate(
-        { orderId: orderId },
+      const updatedOrder = await Order.findByIdAndUpdate(
+        id,
         { $set: req.body },
         { new: true, runValidators: true }
       );
@@ -95,7 +95,7 @@ export const createOrder = async (req, res) => {
       if (!updatedOrder) {
         return res.status(404).json({
           success: false,
-          message: "Order not found with this orderId.",
+          message: "Order not found with this _id.",
         });
       }
   
@@ -114,11 +114,12 @@ export const createOrder = async (req, res) => {
     }
   };
   
+  
   // Delete an order
-  export const deleteOrder = async (req, res) => {
+export const deleteOrder = async (req, res) => {
     try {
-      const { orderId } = req.params;
-      const deletedOrder = await Order.findOneAndDelete({ orderId });
+      const { id } = req.params;
+      const deletedOrder = await Order.findByIdAndDelete(id);
   
       if (!deletedOrder) {
         return res.status(404).json({
@@ -138,18 +139,19 @@ export const createOrder = async (req, res) => {
         error: error.message,
       });
     }
-  };
+};
+  
   
   // Get order by orderId
-  export const getOrderById = async (req, res) => {
+export const getOrderById = async (req, res) => {
     try {
-      const { orderId } = req.params;
-      const order = await Order.findOne({ orderId });
+      const { id } = req.params;
+      const order = await Order.findById(id);
   
       if (!order) {
         return res.status(404).json({
           success: false,
-          message: "Order Id not found.",
+          message: "Order not found.",
         });
       }
   
@@ -165,8 +167,9 @@ export const createOrder = async (req, res) => {
       });
     }
   };
+  
 
-  export default {
+export default {
     getAllOrders,
     createOrder,
     editOrder,

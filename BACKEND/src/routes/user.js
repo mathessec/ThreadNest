@@ -15,10 +15,10 @@ import userController from '../controller/user.js';
 
 router.get('/getAllUsers',verifyAuth,userController.getAllUsers);
 router.get('/getUserById/:id',verifyAuth,userController.getUserById);
-router.post('/createUser',verifyAuth,userController.createUser);
+router.post('/createUser',userController.createUser);
 router.post('/editUserById/:id',verifyAuth,userController.editUserById);
 router.post('/deleteUserById/:id',verifyAuth,userController.deleteUserById);
-router.post('/login', userController.login);
+router.post('/login',userController.login);
 router.post('/forgotPassword',verifyAuth,userController.forgotPassword);
 router.post('/resetPassword',verifyAuth,userController.resetPassword); // accepts token in body
 

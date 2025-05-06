@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Camera, Save, Store, User, Phone, Mail, MapPin, 
-  Clock, Calendar, Truck, Info, X, Plus
+  Clock, Calendar, Truck, Info, X, Plus, Trash2
 } from 'lucide-react';
 import api from '../../service/ApiService';
 import ApiRoutes from '../../utils/ApiRoutes';
@@ -13,6 +13,10 @@ const CreateTailor = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  
+  // Add new state for tailor image
+  const [tailorImage, setTailorImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   
   const [formData, setFormData] = useState({
     shopName: '',
@@ -52,6 +56,28 @@ const CreateTailor = () => {
     }
   };
 
+  // New function to handle image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    
+    if (file) {
+      setTailorImage(file);
+      
+      // Create a preview URL for the image
+      const fileReader = new FileReader();
+      fileReader.onload = () => {
+        setImagePreview(fileReader.result);
+      };
+      fileReader.readAsDataURL(file);
+    }
+  };
+
+  // Function to remove the selected image
+  const handleRemoveImage = () => {
+    setTailorImage(null);
+    setImagePreview('');
+  };
+
   const handleWorkingDaysChange = (day) => {
     const currentWorkingDays = [...formData.workingDays];
     const currentClosedDays = [...formData.closedOn];
@@ -79,8 +105,29 @@ const CreateTailor = () => {
     setError('');
     
     try {
-      const response = await api.post(ApiRoutes.CREATE_TAILOR.path, formData, {
-        authenticate: true
+      // Create FormData object to send both JSON and file data
+      const submitData = new FormData();
+      
+      // Append all the form fields
+      Object.keys(formData).forEach(key => {
+        if (Array.isArray(formData[key])) {
+          // Handle arrays by appending as JSON string
+          submitData.append(key, JSON.stringify(formData[key]));
+        } else {
+          submitData.append(key, formData[key]);
+        }
+      });
+      
+      // Append the image file if it exists
+      if (tailorImage) {
+        submitData.append('shopImage', tailorImage);
+      }
+      
+      const response = await api.post(ApiRoutes.CREATE_TAILOR.path, submitData, {
+        authenticate: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
       });
       
       setSuccess(true);
@@ -411,7 +458,7 @@ const CreateTailor = () => {
                   )}
                 </div>
                 
-                {/* Upload Section - Placeholder for future implementation */}
+                {/* Upload Section - Updated with actual functionality */}
                 <div className="md:col-span-2 mt-6">
                   <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                     <Camera className="mr-2 text-indigo-600" size={20} />
@@ -419,22 +466,52 @@ const CreateTailor = () => {
                   </h3>
                   <div className="h-px bg-gradient-to-r from-indigo-500 to-purple-500 mb-6"></div>
                   
-                  <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
-                    <div className="text-center">
-                      <Camera className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-600">Upload photos of your shop</p>
-                        <p className="text-xs text-gray-500">(This feature will be available soon)</p>
+                  {!imagePreview ? (
+                    <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
+                      <div className="text-center">
+                        <Camera className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-600">Upload a photo of your shop</p>
+                          <p className="text-xs text-gray-500">(Recommended: JPG, PNG, or WEBP format)</p>
+                        </div>
+                        <label htmlFor="shopImage" className="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-md text-sm font-medium inline-block cursor-pointer hover:shadow-md transition-all">
+                          Choose File
+                        </label>
+                        <input
+                          id="shopImage"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
                       </div>
-                      <button
-                        type="button"
-                        disabled
-                        className="mt-4 px-4 py-2 bg-gray-200 text-gray-600 rounded-md text-sm font-medium cursor-not-allowed"
-                      >
-                        Upload Photos
-                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-700">Shop Image Preview</h4>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </motion.button>
+                      </div>
+                      <div className="relative w-full h-64 overflow-hidden rounded-md bg-gray-200">
+                        <img 
+                          src={imagePreview} 
+                          alt="Shop preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {tailorImage?.name} ({(tailorImage?.size / (1024 * 1024)).toFixed(2)} MB)
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
               
